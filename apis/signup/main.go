@@ -91,10 +91,10 @@ func main() {
 	jwtService = jwt.NewJwtServiceClient(network.NewGRPCClientConnection(config.GetUint("JWT_PORT"), log))
 	helloService = hello.NewHelloServiceClient(network.NewGRPCClientConnection(config.GetUint("HELLO_PORT"), log))
 
-	db := mongodb.Connect("mongodb://localhost:27001", "auth-api", "VpGdxrtBbzs0Zgxn5o", log)
-	dbCollection = db.GetCollection("auth", "users")
+	db := mongodb.Connect(config.GetString("SIGNUP_DB_HOST"), config.GetString("SIGNUP_DB_USERNAME"), config.GetString("SIGNUP_DB_PASSWORD"), log)
+	dbCollection = db.GetCollection(config.GetString("SIGNUP_DB_DATABASE"), config.GetString("SIGNUP_DB_COLLECTION"))
 
-	app := network.NewMicroServiceServer(config.GetUint("SIGN_UP_PORT"), log)
+	app := network.NewMicroServiceServer(config.GetUint("SIGNUP_PORT"), log)
 	signup.RegisterSignUpServiceServer(app.InternalServer, &SignUpServiceServer{})
 	app.Start()
 }
