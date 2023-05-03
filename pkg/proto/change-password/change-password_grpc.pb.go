@@ -22,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChangePasswordServiceClient interface {
-	// Changes the password for a user
 	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 }
 
@@ -47,7 +46,6 @@ func (c *changePasswordServiceClient) ChangePassword(ctx context.Context, in *Ch
 // All implementations must embed UnimplementedChangePasswordServiceServer
 // for forward compatibility
 type ChangePasswordServiceServer interface {
-	// Changes the password for a user
 	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	mustEmbedUnimplementedChangePasswordServiceServer()
 }
