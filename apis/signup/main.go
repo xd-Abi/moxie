@@ -39,12 +39,24 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 	if utils.IsEmptyOrWhitespace(request.Password) {
 		return nil, constants.ErrPasswordEmpty
 	}
-
-	document := bson.D{
-		{Key: "name", Value: "John Doe"},
-		{Key: "email", Value: "john.doe@example.com"},
+	if _, err := dbCollection.FindOne(bson.D{{Key: "email", Value: request.Email}}); err == nil {
+		return nil, constants.ErrEmailAlreadyExists
 	}
-	dbCollection.InsertOne(document)
+	if _, err := dbCollection.FindOne(bson.D{{Key: "username", Value: request.Username}}); err == nil {
+		return nil, constants.ErrUsernameAlreadyExists
+	}
+
+	user := bson.D{
+		// @TOOD: Generate uuid
+		{Key: "id", Value: "123123"},
+		{Key: "username", Value: request.Username},
+		{Key: "email", Value: request.Email},
+
+		// @TODO: Hash password
+		{Key: "password", Value: request.Password},
+	}
+
+	dbCollection.InsertOne(user)
 
 	return nil, nil
 }
