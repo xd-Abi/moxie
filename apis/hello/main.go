@@ -7,6 +7,7 @@ import (
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/xd-Abi/moxie/pkg/config"
+	"github.com/xd-Abi/moxie/pkg/constants"
 	"github.com/xd-Abi/moxie/pkg/logging"
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/hello"
@@ -33,8 +34,10 @@ func (s *HelloServiceServer) SendWelcomeEmail(ctx context.Context, request *hell
 	_, err := client.Send(message)
 
 	if err != nil {
-		log.Error("%v", err)
-		// @TODO: Return error
+		log.Error("Failed to send email: %v", err)
+		return nil, constants.ErrInternal
+	} else {
+		log.Info("Send welcome email to %v", request.Email)
 	}
 
 	return &hello.WelcomeEmailResponse{
