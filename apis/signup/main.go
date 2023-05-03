@@ -52,8 +52,9 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 		return nil, constants.ErrInternal
 	}
 
+	userId := utils.GenerateUUID()
 	user := bson.D{
-		{Key: "id", Value: utils.GenerateUUID()},
+		{Key: "id", Value: userId},
 		{Key: "username", Value: request.Username},
 		{Key: "email", Value: request.Email},
 		{Key: "password", Value: hashedPassword},
@@ -64,7 +65,25 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 		return nil, constants.ErrInternal
 	}
 
-	return nil, nil
+	_, err = helloService.SendWelcomeEmail(ctx, &hello.WelcomeEmailRequest{
+		Username: request.Username,
+		Email:    request.Email,
+	})
+	if err != nil {
+		log.Error("Hello service failed to send welcome email: %v", err)
+	}
+
+	tokenResponse, err := jwtService.GenerateToken(ctx, &jwt.GenerateTokenRequest{
+		Subject: userId,
+	})
+	if err != nil {
+		log.Error("JWT service failed to generate access token: %v", err)
+		return nil, constants.ErrInternal
+	}
+
+	return &signup.SignUpResponse{
+		AccessToken: tokenResponse.Token,
+	}, nil
 }
 
 func main() {
