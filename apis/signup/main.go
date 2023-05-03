@@ -47,8 +47,7 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 	}
 
 	user := bson.D{
-		// @TOOD: Generate uuid
-		{Key: "id", Value: "123123"},
+		{Key: "id", Value: utils.GenerateUUID()},
 		{Key: "username", Value: request.Username},
 		{Key: "email", Value: request.Email},
 
@@ -56,7 +55,10 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 		{Key: "password", Value: request.Password},
 	}
 
-	dbCollection.InsertOne(user)
+	_, err := dbCollection.InsertOne(user)
+	if err != nil {
+		return nil, constants.ErrInternal
+	}
 
 	return nil, nil
 }
