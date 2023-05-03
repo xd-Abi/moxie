@@ -46,16 +46,20 @@ func (s *SignUpServiceServer) SignUp(ctx context.Context, request *signup.SignUp
 		return nil, constants.ErrUsernameAlreadyExists
 	}
 
+	hashedPassword, err := utils.HashPassword(request.Password)
+	if err != nil {
+		log.Error("Failed to hash password: %v", err)
+		return nil, constants.ErrInternal
+	}
+
 	user := bson.D{
 		{Key: "id", Value: utils.GenerateUUID()},
 		{Key: "username", Value: request.Username},
 		{Key: "email", Value: request.Email},
-
-		// @TODO: Hash password
-		{Key: "password", Value: request.Password},
+		{Key: "password", Value: hashedPassword},
 	}
 
-	_, err := dbCollection.InsertOne(user)
+	_, err = dbCollection.InsertOne(user)
 	if err != nil {
 		return nil, constants.ErrInternal
 	}
