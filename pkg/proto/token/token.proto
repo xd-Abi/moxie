@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package token;
+option go_package = "github.com/xd-Abi/moxie-go/pkg/proto/token";
+
+service TokenService {
+    rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
+    rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
+}
+
+message GenerateTokenRequest {
+    string subject = 1;
+}
+
+message GenerateTokenResponse {
+    string token = 1;
+}
+
+message VerifyTokenRequest {
+    string token = 1;
+}
+
+message VerifyTokenResponse {
+    map<string, string> payload = 1;
+}
