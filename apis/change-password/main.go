@@ -68,7 +68,7 @@ func (s *ChangePasswordServiceServer) ChangePassword(ctx context.Context, reques
 
 	_, err = dbCollection.UpdateOne(bson.D{{Key: "id", Value: verificationResponse.Payload["sub"]}}, update)
 	if err != nil {
-		log.Error("Failed to update user password")
+		log.Error("Failed to update user's password")
 		return nil, constants.ErrInternal
 	}
 
