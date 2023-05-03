@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package token;
-option go_package = "github.com/xd-Abi/moxie-go/pkg/proto/token";
+package jwt;
+option go_package = "github.com/xd-Abi/moxie-go/pkg/proto/jwt";
 
-service TokenService {
+service JwtService {
     rpc GenerateToken(GenerateTokenRequest) returns (GenerateTokenResponse) {}
     rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse) {}
 }
