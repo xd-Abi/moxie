@@ -1,0 +1,12 @@
+version: "3.1"
+
+services:
+  auth-api:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=auth
+      - MONGO_INITDB_ROOT_USERNAME=auth-api
+      - MONGO_INITDB_ROOT_PASSWORD=VpGdxrtBbzs0Zgxn5o
+    ports:
+      - 27001:27017
