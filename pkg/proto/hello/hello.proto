@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package hello;
+option go_package = "github.com/xd-Abi/moxie/pkg/hello";
+
+service HelloService {
+    rpc SendWelcomeEmail(WelcomeEmailRequest) returns (WelcomeEmailResponse) {}
+}
+
+message WelcomeEmailRequest {
+    string username = 1;
+    string email = 2;
+}
+
+message WelcomeEmailResponse {
+    bool success = 1;
+}
