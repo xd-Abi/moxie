@@ -39,3 +39,14 @@ func (s *MicroServiceServer) Start() {
 		log.Fatal("Failed to serve grpc server")
 	}
 }
+
+// Connects to a localhost grpc client
+func NewGRPCClientConnection(port uint, log *logging.Log) *grpc.ClientConn {
+	connection, err := grpc.Dial(fmt.Sprintf("localhost:%v", port), grpc.WithInsecure())
+
+	if err != nil {
+		log.Fatal("Failed to dial: %v", err)
+	}
+
+	return connection
+}
