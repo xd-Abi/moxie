@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package signup;
+option go_package = "github.com/xd-Abi/moxie-go/pkg/proto/signup";
+
+service SignUpService {
+    rpc SignUp(SignUpRequest) returns (SignUpResponse) {}
+}
+
+message SignUpRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message SignUpResponse {
+    string access_token = 1;
+}
