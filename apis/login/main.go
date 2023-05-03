@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/xd-Abi/moxie/pkg/config"
+	"github.com/xd-Abi/moxie/pkg/constants"
 	"github.com/xd-Abi/moxie/pkg/logging"
 	"github.com/xd-Abi/moxie/pkg/mongodb"
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/jwt"
 	"github.com/xd-Abi/moxie/pkg/proto/login"
+	"github.com/xd-Abi/moxie/pkg/utils"
 )
 
 var (
@@ -22,6 +24,20 @@ type LoginServiceServer struct {
 }
 
 func (s *LoginServiceServer) Login(ctx context.Context, request *login.LoginRequest) (*login.LoginResponse, error) {
+	if utils.IsEmptyOrWhitespace(request.Email) {
+		return nil, constants.ErrEmailEmpty
+	}
+	if !utils.IsEmail(request.Email) {
+		return nil, constants.ErrEmailInvalid
+	}
+	if utils.IsEmptyOrWhitespace(request.Password) {
+		return nil, constants.ErrPasswordEmpty
+	}
+	verificationResponse, err := jwtService.VerifyToken(ctx, &jwt.VerifyTokenRequest{Token: request.AccessToken})
+	if err != nil {
+		return nil, constants.ErrUnauthorized
+	}
+
 	return nil, nil
 }
 
