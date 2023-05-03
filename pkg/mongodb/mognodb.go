@@ -66,3 +66,11 @@ func (c *MongoCollection) InsertOne(document interface{}) (*mongo.InsertOneResul
 	}
 	return result, nil
 }
+
+func (c *MongoCollection) UpdateOne(filter bson.D, update bson.D) (*mongo.UpdateResult, error) {
+	result, err := c.internalCollection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
