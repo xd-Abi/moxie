@@ -11,6 +11,7 @@ import (
 	"github.com/xd-Abi/moxie/pkg/proto/jwt"
 	"github.com/xd-Abi/moxie/pkg/proto/login"
 	"github.com/xd-Abi/moxie/pkg/utils"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
@@ -33,12 +34,38 @@ func (s *LoginServiceServer) Login(ctx context.Context, request *login.LoginRequ
 	if utils.IsEmptyOrWhitespace(request.Password) {
 		return nil, constants.ErrPasswordEmpty
 	}
-	verificationResponse, err := jwtService.VerifyToken(ctx, &jwt.VerifyTokenRequest{Token: request.AccessToken})
+
+	user, err := dbCollection.FindOne(bson.D{{Key: "email", Value: request.Email}})
 	if err != nil {
-		return nil, constants.ErrUnauthorized
+		return nil, constants.ErrUserNotFound
 	}
 
-	return nil, nil
+	if currentHashedPassword, ok := user["password"].(string); ok {
+		if !utils.ComparePasswords([]byte(currentHashedPassword), []byte(request.Password)) {
+			return nil, constants.ErrPasswordInvalid
+		}
+	} else {
+		log.Error("Failed to convert current password into string")
+		return nil, constants.ErrInternal
+	}
+
+	userId, ok := user["id"].(string)
+	if !ok {
+		log.Error("Failed to convert user id into string")
+		return nil, constants.ErrInternal
+	}
+
+	tokenResponse, err := jwtService.GenerateToken(ctx, &jwt.GenerateTokenRequest{
+		Subject: userId,
+	})
+	if err != nil {
+		log.Error("JWT service failed to generate access token: %v", err)
+		return nil, constants.ErrInternal
+	}
+
+	return &login.LoginResponse{
+		AccessToken: tokenResponse.Token,
+	}, nil
 }
 
 func main() {

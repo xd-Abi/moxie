@@ -24,6 +24,7 @@ var (
 	ErrUsernameEmpty          = &MoxieError{code: 400, message: "Username can not be empty or whitespace"}
 	ErrUsernameAlreadyExists  = &MoxieError{code: 400, message: "Username already exists"}
 	ErrPasswordEmpty          = &MoxieError{code: 400, message: "Password can not be empty or whitespace"}
+	ErrPasswordInvalid        = &MoxieError{code: 400, message: "Password does not match"}
 	ErrCurrentPasswordEmpty   = &MoxieError{code: 400, message: "Current password can not be empty or whitespace"}
 	ErrCurrentPasswordInvalid = &MoxieError{code: 400, message: "Current password does not match"}
 	ErrNewPasswordEmpty       = &MoxieError{code: 400, message: "New password can not be empty or whitespace"}
