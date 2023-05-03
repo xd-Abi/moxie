@@ -11,6 +11,7 @@ import (
 	"github.com/xd-Abi/moxie/pkg/logging"
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/hello"
+	"github.com/xd-Abi/moxie/pkg/utils"
 )
 
 var (
@@ -24,9 +25,21 @@ type HelloServiceServer struct {
 }
 
 func (s *HelloServiceServer) SendWelcomeEmail(ctx context.Context, request *hello.WelcomeEmailRequest) (*hello.WelcomeEmailResponse, error) {
+	if utils.IsEmptyOrWhitespace(request.Email) {
+		return nil, constants.ErrEmailEmpty
+	}
+	if !utils.IsEmail(request.Email) {
+		return nil, constants.ErrEmailInvalid
+	}
+	if utils.IsEmptyOrWhitespace(request.Username) {
+		return nil, constants.ErrUsernameEmpty
+	}
+
 	from := mail.NewEmail("Moxie", s.SendGridSender)
 	subject := "Welcome to moxie 😎"
 	to := mail.NewEmail(request.Username, request.Email)
+
+	// @TODO: Load html content from e.g. template.html file
 	plainTextContent := fmt.Sprintf("Hi %s", request.Username)
 	htmlContent := fmt.Sprintf("Hi <strong>%s</strong>", request.Username)
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
