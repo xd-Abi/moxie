@@ -49,7 +49,7 @@ To get started with Moxie, follow these steps:
     go run apis/<api-name>/main.go
 
     # Example
-    go run apis/hello/main.go
+    go run apis/auth/main.go
    ```
 
 ## 🔑 License

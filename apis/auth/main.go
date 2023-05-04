@@ -44,6 +44,7 @@ type Config struct {
 	JwtExpiration          time.Duration
 	RefreshTokenExpiration time.Duration
 	Mongo                  *MongoConfig
+	RabbitMQUrl            string
 }
 
 type AuthServiceServer struct {
@@ -60,7 +61,7 @@ func NewAuthServiceServer(config *Config, log *logging.Log) *AuthServiceServer {
 	db := mongodb.Connect(config.Mongo.Uri, config.Mongo.Username, config.Mongo.Password, log)
 	userCollection := db.GetCollection(config.Mongo.Name, config.Mongo.UserCollection)
 	refreshTokenCollection := db.GetCollection(config.Mongo.Name, config.Mongo.RefreshTokenCollection)
-	rabbitMQConnection := rabbitmq.NewConnection("amqp://moxie-rabbit:moxie-rabbit-123@localhost:5672/", log)
+	rabbitMQConnection := rabbitmq.NewConnection(config.RabbitMQUrl, log)
 	rabbitMQConnection.DeclareExchange(rabbitmq.AuthExchangeKey)
 	rabbitMQConnection.DeclareQueue(rabbitmq.ProfileQueueKey)
 	rabbitMQConnection.Bind(rabbitmq.ProfileQueueKey, rabbitmq.UserSignUpEventKey, rabbitmq.AuthExchangeKey)
@@ -296,6 +297,7 @@ func main() {
 		JwtSigningKey:          []byte(config.GetString("AUTH_JWT_SIGNING_KEY")),
 		JwtExpiration:          time.Duration(config.GetUint("AUTH_JWT_EXPIRATION")),
 		RefreshTokenExpiration: time.Duration(config.GetUint("AUTH_REFRESH_TOKEN_EXPIRATION")),
+		RabbitMQUrl:            config.GetString("AUTH_RABBITMQ_URL"),
 		Mongo: &MongoConfig{
 			Uri:                    config.GetString("AUTH_DB_URI"),
 			Username:               config.GetString("AUTH_DB_USERNAME"),
