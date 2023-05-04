@@ -59,6 +59,14 @@ func (c *MongoCollection) FindOne(filter bson.D) (bson.M, error) {
 	return result, nil
 }
 
+func (c *MongoCollection) FindOneAndDecode(filter bson.D, output interface{}) error {
+	err := c.internalCollection.FindOne(context.Background(), filter).Decode(output)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *MongoCollection) InsertOne(document interface{}) (*mongo.InsertOneResult, error) {
 	result, err := c.internalCollection.InsertOne(context.Background(), document)
 	if err != nil {
@@ -67,8 +75,8 @@ func (c *MongoCollection) InsertOne(document interface{}) (*mongo.InsertOneResul
 	return result, nil
 }
 
-func (c *MongoCollection) UpdateOne(filter bson.D, update bson.D) (*mongo.UpdateResult, error) {
-	result, err := c.internalCollection.UpdateOne(context.Background(), filter, update)
+func (c *MongoCollection) UpdateOne(filter bson.D, document interface{}) (*mongo.UpdateResult, error) {
+	result, err := c.internalCollection.UpdateOne(context.Background(), filter, document)
 	if err != nil {
 		return nil, err
 	}

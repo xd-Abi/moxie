@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/xd-Abi/moxie/pkg/config"
 	"github.com/xd-Abi/moxie/pkg/logging"
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/auth"
@@ -25,20 +26,28 @@ func (s *HealthServiceServer) CheckHealth(ctx context.Context, request *health.C
 }
 
 func checkHealth() {
-	authHealthRecord := health.Record{Timestamp: time.Now().Unix()}
+	startTime := time.Now().Unix()
+
+	// Auth Service health check
+	authHealthRecord := health.Record{}
 	if authHealthResponse, err := authService.GetHealth(context.Background(), &auth.HealthRequest{}); err == nil {
-		authHealthRecord.Message, authHealthRecord.Healthy = authHealthResponse.Message, true
+		authHealthRecord.Message = authHealthResponse.Message
+		authHealthRecord.Healthy = true
+		authHealthRecord.Timestamp = authHealthResponse.Timestamp
 	} else {
-		authHealthRecord.Message, authHealthRecord.Healthy = err.Error(), false
+		authHealthRecord.Message = err.Error()
+		authHealthRecord.Healthy = false
+		authHealthRecord.Timestamp = 0
 	}
 
 	lastHealthReport.Checks = &health.Checks{Auth: &authHealthRecord}
-	lastHealthReport.Timestamp = authHealthRecord.Timestamp
+	lastHealthReport.Timestamp = startTime
 }
 
 func main() {
-	authService = auth.NewAuthServiceClient(network.NewGRPCClientConnection(8000, log))
-	app := network.NewMicroServiceServer(8001, log)
+	config.LoadEnvVariables(log)
+	authService = auth.NewAuthServiceClient(network.NewGRPCClientConnection(config.GetUint("AUTH_PORT"), log))
+	app := network.NewMicroServiceServer(config.GetUint("HEALTH_PORT"), log)
 	health.RegisterHealthServiceServer(app.InternalServer, &HealthServiceServer{})
 	go app.Start()
 

@@ -30,5 +30,7 @@ var (
 	ErrNewPasswordEmpty       = &MoxieError{code: 400, message: "New password can not be empty or whitespace"}
 	ErrJwtEmpty               = &MoxieError{code: 400, message: "Jwt can not be empty or whitespace"}
 	ErrJwtInvalid             = &MoxieError{code: 400, message: "Jwt is invalid"}
+	ErrRefreshTokenEmpty      = &MoxieError{code: 400, message: "Refresh token is empty"}
+	ErrRefreshTokenInvalid    = &MoxieError{code: 400, message: "Refresh token is invalid"}
 	ErrSubjectEmpty           = &MoxieError{code: 400, message: "Subject can not be empty or whitespace"}
 )

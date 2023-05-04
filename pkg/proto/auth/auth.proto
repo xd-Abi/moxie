@@ -4,7 +4,48 @@ package auth;
 option go_package = "github.com/xd-Abi/moxie/pkg/proto/auth";
 
 service AuthService {
+    rpc SignUp(SignUpRequest) returns (SignUpResponse) {}
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+    rpc VerifyToken(TokenVerificationRequest) returns (TokenVerificationResponse) {}
+    rpc RefreshToken(TokenRefreshRequest) returns (TokenRefreshResponse) {}
     rpc GetHealth(HealthRequest) returns (HealthResponse) {}
+}
+
+message SignUpRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+}
+
+message SignUpResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message TokenVerificationRequest {
+    string access_token = 1;
+}
+
+message TokenVerificationResponse {
+    map<string, string> payload = 1;
+}
+
+message TokenRefreshRequest {
+  string refresh_token = 1;
+}
+
+message TokenRefreshResponse {
+  string access_token = 1;
 }
 
 message HealthRequest {}
