@@ -15,6 +15,7 @@ message Record {
 
 message Checks {
     Record auth = 1;
+    Record profile = 2;
 }
 
 message CheckHealthRequest {

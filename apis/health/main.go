@@ -9,11 +9,12 @@ import (
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/auth"
 	"github.com/xd-Abi/moxie/pkg/proto/health"
+	"github.com/xd-Abi/moxie/pkg/proto/profile"
 )
 
 var (
-	log              = logging.New()
 	authService      auth.AuthServiceClient
+	profileService   profile.ProfileServiceClient
 	lastHealthReport health.CheckHealthResponse
 )
 
@@ -40,13 +41,28 @@ func checkHealth() {
 		authHealthRecord.Timestamp = 0
 	}
 
-	lastHealthReport.Checks = &health.Checks{Auth: &authHealthRecord}
+	// Profile Service health check
+	profileHealthRecord := health.Record{}
+	if profileHealthResponse, err := profileService.GetHealth(context.Background(), &profile.HealthRequest{}); err == nil {
+		profileHealthRecord.Message = profileHealthResponse.Message
+		profileHealthRecord.Healthy = true
+		profileHealthRecord.Timestamp = profileHealthResponse.Timestamp
+	} else {
+		profileHealthRecord.Message = err.Error()
+		profileHealthRecord.Healthy = false
+		profileHealthRecord.Timestamp = 0
+	}
+
+	lastHealthReport.Checks = &health.Checks{Auth: &authHealthRecord, Profile: &profileHealthRecord}
 	lastHealthReport.Timestamp = startTime
 }
 
 func main() {
+	log := logging.New()
 	config.LoadEnvVariables(log)
 	authService = auth.NewAuthServiceClient(network.NewGRPCClientConnection(config.GetUint("AUTH_PORT"), log))
+	profileService = profile.NewProfileServiceClient(network.NewGRPCClientConnection(config.GetUint("PROFILE_PORT"), log))
+
 	app := network.NewMicroServiceServer(config.GetUint("HEALTH_PORT"), log)
 	health.RegisterHealthServiceServer(app.InternalServer, &HealthServiceServer{})
 	go app.Start()
