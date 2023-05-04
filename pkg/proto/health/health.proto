@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package health;
+option go_package = "github.com/xd-Abi/moxie/pkg/proto/health";
+
+service HealthService {
+    rpc CheckHealth(CheckHealthRequest) returns (CheckHealthResponse) {}
+}
+
+message Record {
+    string message = 1;
+    int64 timestamp = 2;
+    bool healthy = 3;
+}
+
+message Checks {
+    Record auth = 1;
+}
+
+message CheckHealthRequest {
+}
+
+message CheckHealthResponse {
+    Checks checks = 1;
+    int64 timestamp = 2;
+}

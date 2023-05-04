@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package auth;
+option go_package = "github.com/xd-Abi/moxie/pkg/proto/auth";
+
+service AuthService {
+    rpc GetHealth(HealthRequest) returns (HealthResponse) {}
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+    string message = 1;
+    int64 timestamp = 2;
+}
