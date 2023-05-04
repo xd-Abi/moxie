@@ -12,6 +12,7 @@ import (
 	"github.com/xd-Abi/moxie/pkg/mongodb"
 	"github.com/xd-Abi/moxie/pkg/network"
 	"github.com/xd-Abi/moxie/pkg/proto/auth"
+	"github.com/xd-Abi/moxie/pkg/rabbitmq"
 	"github.com/xd-Abi/moxie/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -50,6 +51,8 @@ type AuthServiceServer struct {
 	Config                 *Config
 	userCollection         *mongodb.MongoCollection
 	refreshTokenCollection *mongodb.MongoCollection
+	rabbitMQConnection     *rabbitmq.RabbitMQConnection
+
 	auth.UnimplementedAuthServiceServer
 }
 
@@ -57,12 +60,17 @@ func NewAuthServiceServer(config *Config, log *logging.Log) *AuthServiceServer {
 	db := mongodb.Connect(config.Mongo.Uri, config.Mongo.Username, config.Mongo.Password, log)
 	userCollection := db.GetCollection(config.Mongo.Name, config.Mongo.UserCollection)
 	refreshTokenCollection := db.GetCollection(config.Mongo.Name, config.Mongo.RefreshTokenCollection)
+	rabbitMQConnection := rabbitmq.NewConnection("amqp://moxie-rabbit:moxie-rabbit-123@localhost:5672/", log)
+	rabbitMQConnection.DeclareExchange(rabbitmq.AuthExchangeKey)
+	rabbitMQConnection.DeclareQueue(rabbitmq.ProfileQueueKey)
+	rabbitMQConnection.Bind(rabbitmq.ProfileQueueKey, rabbitmq.UserSignUpEventKey, rabbitmq.AuthExchangeKey)
 
 	return &AuthServiceServer{
 		Log:                    log,
 		Config:                 config,
 		userCollection:         userCollection,
 		refreshTokenCollection: refreshTokenCollection,
+		rabbitMQConnection:     rabbitMQConnection,
 	}
 }
 
@@ -116,6 +124,14 @@ func (s *AuthServiceServer) SignUp(ctx context.Context, request *auth.SignUpRequ
 		s.Log.Error("Failed to generate refresh token: %v", err)
 		return nil, constants.ErrInternal
 	}
+
+	s.rabbitMQConnection.Publish(rabbitmq.AuthExchangeKey, rabbitmq.NewSignUpEvent(
+		rabbitmq.UserSignUpEventPayload{
+			Id:       user.Id,
+			Username: user.Username,
+			Email:    user.Email,
+		},
+	))
 
 	return &auth.SignUpResponse{
 		AccessToken:  accessToken,
