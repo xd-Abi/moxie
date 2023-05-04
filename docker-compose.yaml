@@ -10,3 +10,12 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=VpGdxrtBbzs0Zgxn5o
     ports:
       - 27001:27017
+
+  rabbitmq:
+    image: rabbitmq:3.9.7-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: moxie-rabbit
+      RABBITMQ_DEFAULT_PASS: moxie-rabbit-123
