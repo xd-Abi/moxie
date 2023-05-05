@@ -4,7 +4,18 @@ package profile;
 option go_package = "github.com/xd-Abi/moxie/pkg/proto/profile";
 
 service ProfileService {
+    rpc GetProfile(GetProfileRequest) returns (GetProfileResponse) {}
     rpc GetHealth(HealthRequest) returns (HealthResponse) {}
+}
+
+message GetProfileRequest {
+    string user_id = 1; 
+}
+
+message GetProfileResponse {
+    string user_id = 1;
+    string tag = 2;
+    string picture = 3;
 }
 
 message HealthRequest {}
