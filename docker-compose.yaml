@@ -10,7 +10,15 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=VpGdxrtBbzs0Zgxn5o
     ports:
       - 27001:27017
-
+  profile-api:
+    image: mongo
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=profile
+      - MONGO_INITDB_ROOT_USERNAME=profile-api
+      - MONGO_INITDB_ROOT_PASSWORD=Bc9CwnNk0Q956ZBzd
+    ports:
+      - 27002:27017
   rabbitmq:
     image: rabbitmq:3.9.7-management
     restart: unless-stopped
