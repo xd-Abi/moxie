@@ -123,6 +123,48 @@ func (rmq *RabbitMQConnection) Publish(exchange string, event *Event) {
 	}
 }
 
+func (rmq *RabbitMQConnection) Consume(queueName string, handler func(*Event) error) {
+	rmq.DeclareQueue(queueName)
+
+	msgs, err := rmq.InternalChannel.Consume(
+		queueName,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		rmq.Log.Error("Failed to register consumer: %v", err)
+	}
+
+	go func() {
+		for msg := range msgs {
+			var payload map[string]interface{}
+			if err := json.Unmarshal(msg.Body, &payload); err != nil {
+				rmq.Log.Error("Failed to unmarshal event payload: %v", err)
+				continue
+			}
+
+			eventType, ok := msg.Headers["x-event-type"].(string)
+			if !ok {
+				rmq.Log.Error("Mssing or invalid x-event-type header")
+			}
+
+			event := &Event{
+				Key:     eventType,
+				Payload: payload,
+			}
+
+			if err := handler(event); err != nil {
+				rmq.Log.Error("Error handling event: %v", err)
+			}
+		}
+	}()
+}
+
 func NewSignUpEvent(payload UserSignUpEventPayload) *Event {
 	return &Event{
 		Key:     UserSignUpEventKey,
